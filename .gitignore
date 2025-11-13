@@ -26,6 +26,23 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# Database credentials & sensitive data
+*.db
+*.sqlite
+*.env
+config.json
+secrets/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
