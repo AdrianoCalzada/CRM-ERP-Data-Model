@@ -18,4 +18,3 @@
 - [ ] Deal/opportunity tracking
 - [ ] Product catalog
 - [ ] Fully integrated ERP
-- [ ] 
