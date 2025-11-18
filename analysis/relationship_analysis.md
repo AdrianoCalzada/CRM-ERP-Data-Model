@@ -1,10 +1,10 @@
 # Relationships & Cardinalities
 
-Conventions
+## Conventions
 - Notation: A 1—M B means “A has many B; B belongs to A”
 - All tenant data is scoped by company_id; foreign keys include company_id where applicable
 
-Multitenancy
+## Multitenancy
 - Company 1—M User
   - Reason: many users per tenant
 - Company 1—1 CompanySettings
@@ -14,7 +14,7 @@ Multitenancy
 - Company 1—M CompanyDomain
   - Reason: tenants can have multiple domains (one primary)
 
-Identity, Auth, Security
+## Identity, Auth, Security
 - User 1—M Session
   - Reason: multiple concurrent logins/devices
 - User 1—M OAuthAccount
@@ -26,7 +26,7 @@ Identity, Auth, Security
 - User M—N UserRole via UserPermission (user_id, role_id)
   - Reason: users can be in multiple roles; role-based access
 
-CRM
+## CRM
 - Company 1—M Contact
   - Reason: many contacts per tenant
 - Contact 1—M Deal
@@ -44,7 +44,7 @@ CRM
 - Contact 1—M Invoice
   - Reason: many invoices per customer
 
-Sales, Products, Inventory
+## Sales, Products, Inventory
 - Company 1—M Product; Company 1—M Service
   - Reason: tenant-specific catalogs
 - Sale 1—M SaleItem
@@ -57,7 +57,7 @@ Sales, Products, Inventory
 - Product 1—M InventoryMovement
   - Reason: stock changes over time
 
-Contracts, Billing, Payments
+## Contracts, Billing, Payments
 - Contact 1—M Contract
   - Reason: a customer can have multiple agreements
 - Contract 1—M ContractInstallment
@@ -69,7 +69,7 @@ Contracts, Billing, Payments
 - Plan 1—M Subscription; Company 1—M Subscription
   - Reason: plan has many subscribers; a company can have a history of subscriptions (enforce max 1 active per company)
 
-Invoicing & Revenue
+## Invoicing & Revenue
 - Contact 1—M Invoice
   - Reason: billing per customer
 - Invoice 0—M Revenue
@@ -79,7 +79,7 @@ Invoicing & Revenue
 - CostCenter 1—M Revenue
   - Reason: allocation by cost center
 
-Expenses & Cost Centers
+## Expenses & Cost Centers
 - ExpenseCategory 1—M Expense
   - Reason: classification for reporting
 - CostCenter 1—M Expense
@@ -91,7 +91,7 @@ Banking & Cash Flow
 - BankAccount 1—M BankStatementEntry
   - Reason: entries per account over time
 
-Integrations, Webhooks, Jobs, Notifications
+## Integrations, Webhooks, Jobs, Notifications
 - Company 1—M Integration
   - Reason: multiple third-party connections
 - Company 1—M WebhookEndpoint; WebhookEndpoint 1—M WebhookDelivery
@@ -101,18 +101,18 @@ Integrations, Webhooks, Jobs, Notifications
 - Company 1—M Notification; User 1—M Notification
   - Reason: notify users within a tenant
 
-Reporting & Analytics
+## Reporting & Analytics
 - Company 1—M ReportSchedule
   - Reason: multiple scheduled reports
 - Company 1—M KPI
   - Reason: multiple KPIs per tenant
 
-Polymorphic attachments (Documents, Activities, Events, Tasks)
+## Polymorphic attachments (Documents, Activities, Events, Tasks)
 - Each belongs to exactly one host entity via (entity_type, entity_id)
 - Any host entity can have many attachments
 - Reason: reuse the same artifact patterns across CRM, billing, and operations
 
-Cardinality decisions and business rules
+## Cardinality decisions and business rules
 - Contact as “client”: All customer-facing relations (Deal, Invoice, Contract, Sale, Revenue) are anchored on Contact to avoid duplicate “client” concepts.
 - Payment granularity: Installments accept multiple payments to support partial payments, reversals, and retries.
 - Subscription lifecycle: Companies can have a timeline of subscriptions (upgrades/downgrades); enforce at most one active subscription.

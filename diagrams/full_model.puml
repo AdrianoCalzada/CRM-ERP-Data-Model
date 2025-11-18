@@ -1,0 +1,487 @@
+@startuml CRM_ERP_FullModel
+title CRM / ERP Data Model (Core Entities & Relationships)
+!theme plain
+hide circle
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam packageTitleFontColor #ffffff
+skinparam packageBorderColor #999999
+skinparam packageBackgroundColor #2b2b2b
+skinparam classBackgroundColor #ffffff
+skinparam classBorderColor #555555
+skinparam ArrowColor #333333
+skinparam classFontSize 12
+skinparam noteFontSize 11
+
+' Legend: PK * , FK # ; nullable fields suffixed ? ; simplified attributes subset
+legend left
+  1—M: left side has one, right side many
+  M—N: many-to-many via junction
+  Polymorphic: (entity_type, entity_id) pattern
+endlegend
+
+package Multitenancy {
+  class Company {
+    *company_id
+    name
+    phone?
+    website?
+    created_at
+  }
+  class CompanySettings {
+    *company_id
+    theme_settings?
+    security_settings?
+    updated_at
+  }
+  class TenantSetting {
+    *setting_id
+    #company_id
+    setting_key
+    setting_value
+    data_type
+    updated_at
+  }
+  class CompanyDomain {
+    *domain_id
+    #company_id
+    domain_name
+    is_primary
+    verified_at?
+    created_at
+  }
+  Company -- CompanySettings : 1--1
+  Company "1" --> "*" TenantSetting
+  Company "1" --> "*" CompanyDomain
+}
+
+package Identity_Auth_Security {
+  class User {
+    *user_id
+    #company_id
+    email
+    first_name?
+    last_name?
+    role?
+    is_active
+    created_at
+  }
+  class Session {
+    *session_id
+    #user_id
+    expires_at
+    created_at
+  }
+  class OAuthAccount {
+    *oauth_account_id
+    #user_id
+    provider
+    provider_user_id
+    expires_at?
+  }
+  class TwoFactor {
+    *two_factor_id
+    #user_id
+    totp_secret
+    enabled_at?
+  }
+  class PasswordResetToken {
+    *token_id
+    #user_id
+    token
+    expires_at
+    used_at?
+  }
+  class EmailVerificationToken {
+    *token_id
+    #user_id
+    token
+    expires_at
+    used_at?
+  }
+  class UserRole {
+    *role_id
+    #company_id
+    name
+    permissions?
+  }
+  ' junction for M-N User<->UserRole
+  class UserPermission {
+    *user_id
+    *role_id
+  }
+  User "1" --> "*" Session
+  User "1" --> "*" OAuthAccount
+  User "0..1" --> TwoFactor
+  User "1" --> "*" PasswordResetToken
+  User "1" --> "*" EmailVerificationToken
+  UserRole "*" -- "*" User : via UserPermission
+}
+
+package CRM {
+  class Contact {
+    *contact_id
+    #company_id
+    first_name?
+    last_name?
+    email?
+    status?
+    source?
+    created_at
+  }
+  class Deal {
+    *deal_id
+    #company_id
+    #contact_id
+    owner_user_id?
+    name
+    value?
+    stage?
+    expected_close_date?
+    status?
+  }
+  class Activity {
+    *activity_id
+    #company_id
+    user_id?
+    contact_id?
+    deal_id?
+    type?
+    subject?
+    created_at
+  }
+  Contact "1" --> "*" Deal
+  User "1" --> "*" Deal : owner
+  Contact "1" --> "*" Activity
+  Deal "1" --> "*" Activity
+  User "1" --> "*" Activity : actor
+  Company "1" --> "*" Contact
+}
+
+package Sales_Inventory {
+  class Product {
+    *product_id
+    #company_id
+    name
+    sku
+    price
+    track_inventory
+    is_active
+  }
+  class Service {
+    *service_id
+    #company_id
+    name
+    price
+    is_active
+  }
+  class Sale {
+    *sale_id
+    #company_id
+    #contact_id
+    total_amount
+    sale_date
+    status?
+  }
+  class SaleItem {
+    *sale_item_id
+    #sale_id
+    product_id?
+    service_id?
+    quantity
+    unit_price
+    total_amount
+  }
+  class InventoryMovement {
+    *movement_id
+    #company_id
+    #product_id
+    movement_type
+    quantity
+    unit_cost?
+    created_at
+  }
+  Company "1" --> "*" Product
+  Company "1" --> "*" Service
+  Contact "1" --> "*" Sale
+  Sale "1" --> "*" SaleItem
+  Product "1" --> "*" SaleItem
+  Service "1" --> "*" SaleItem
+  Product "1" --> "*" InventoryMovement
+  note right of SaleItem
+    Exactly one of product_id or service_id non-null
+  end note
+}
+
+package Contracts_Billing_Payments {
+  class Contract {
+    *contract_id
+    #company_id
+    #contact_id
+    total_value?
+    installment_count?
+    start_date?
+    status?
+  }
+  class ContractInstallment {
+    *installment_id
+    #contract_id
+    installment_number
+    due_date
+    amount
+    status?
+  }
+  class Payment {
+    *payment_id
+    #company_id
+    contract_installment_id?
+    bank_account_id?
+    amount
+    payment_date
+    status?
+  }
+  class BankAccount {
+    *bank_account_id
+    #company_id
+    bank_name
+    account_number
+    balance?
+  }
+  class BankStatementEntry {
+    *entry_id
+    #bank_account_id
+    transaction_date
+    amount
+    transaction_type
+  }
+  Contract "1" --> "*" ContractInstallment
+  ContractInstallment "0..1" --> "*" Payment : partial payments
+  BankAccount "1" --> "*" Payment
+  Company "1" --> "*" BankAccount
+  BankAccount "1" --> "*" BankStatementEntry
+}
+
+package Subscription_Billing {
+  class Plan {
+    *plan_id
+    name
+    price_monthly?
+    price_yearly?
+    is_active
+  }
+  class Subscription {
+    *subscription_id
+    #company_id
+    #plan_id
+    status
+    start_date
+    end_date?
+    next_billing_date?
+  }
+  Plan "1" --> "*" Subscription
+  Company "1" --> "*" Subscription : history
+  note right of Subscription
+    Enforce max 1 active per company
+  end note
+}
+
+package Invoicing_Revenue_Expenses {
+  class Invoice {
+    *invoice_id
+    #company_id
+    #contact_id
+    invoice_number
+    status
+    issue_date
+    due_date?
+    total_amount
+  }
+  class Revenue {
+    *revenue_id
+    #company_id
+    contact_id?
+    invoice_id?
+    amount
+    revenue_date
+    category?
+    cost_center_id?
+  }
+  class RevenueCategory {
+    *category_id
+    #company_id
+    name
+    is_active
+  }
+  class Expense {
+    *expense_id
+    #company_id
+    description
+    amount
+    expense_date
+    category?
+    cost_center_id?
+  }
+  class ExpenseCategory {
+    *category_id
+    #company_id
+    name
+    is_active
+  }
+  class CostCenter {
+    *cost_center_id
+    #company_id
+    name
+    budget?
+    is_active
+  }
+  Contact "1" --> "*" Invoice
+  Invoice "0..1" --> "*" Revenue : allocation
+  RevenueCategory "1" --> "*" Revenue
+  CostCenter "1" --> "*" Revenue
+  ExpenseCategory "1" --> "*" Expense
+  CostCenter "1" --> "*" Expense
+  Contact "1" --> "*" Revenue
+  Company "1" --> "*" Invoice
+}
+
+package Client_Lifecycle {
+  class ClientApplication {
+    *application_id
+    #company_id
+    contact_id?
+    status
+    converted_at?
+  }
+  class CreditAnalysis {
+    *analysis_id
+    #company_id
+    client_application_id
+    analyst_user_id?
+    risk_score?
+    status
+  }
+  Company "1" --> "*" ClientApplication
+  ClientApplication "1" --> "*" CreditAnalysis
+  User "1" --> "*" CreditAnalysis : analyst
+}
+
+package Document_Operational {
+  class Document {
+    *document_id
+    #company_id
+    entity_type
+    entity_id
+    file_name
+    uploaded_at
+  }
+  class CalendarEvent {
+    *event_id
+    #company_id
+    title
+    start_time
+    end_time
+    entity_type?
+    entity_id?
+  }
+  class Task {
+    *task_id
+    #company_id
+    assigned_to?
+    title
+    due_date?
+    status?
+    entity_type?
+    entity_id?
+  }
+  class ActivityAttachment <<Polymorphic Host>> {
+    entity_type
+    entity_id
+  }
+  Task "*" -- User : assignee
+  note bottom of Document
+    Polymorphic attachment to any host entity
+  end note
+}
+
+package System_Administration {
+  class AuditLog {
+    *log_id
+    #company_id
+    user_id?
+    action
+    entity_type?
+    entity_id?
+    timestamp
+  }
+  class Integration {
+    *integration_id
+    #company_id
+    service_name
+    is_active
+    last_sync_at?
+  }
+  class Notification {
+    *notification_id
+    #company_id
+    #user_id?
+    title
+    type
+    is_read
+    created_at
+  }
+  class WebhookEndpoint {
+    *endpoint_id
+    #company_id
+    url
+    is_active
+  }
+  class WebhookDelivery {
+    *delivery_id
+    #endpoint_id
+    event_name
+    attempt
+    status
+  }
+  class JobQueue {
+    *job_id
+    company_id?
+    type
+    run_at?
+    status
+  }
+  Company "1" --> "*" Integration
+  Company "1" --> "*" Notification
+  User "1" --> "*" Notification
+  WebhookEndpoint "1" --> "*" WebhookDelivery
+  Company "1" --> "*" WebhookEndpoint
+  Company "1" --> "*" JobQueue : tenant jobs
+  note right of JobQueue
+    company_id nullable for system-wide jobs
+  end note
+}
+
+' Cross-package relationships not already drawn explicitly
+Company "1" --> "*" User
+Company "1" --> "*" Deal
+Company "1" --> "*" Product
+Company "1" --> "*" Service
+Company "1" --> "*" Contract
+Company "1" --> "*" Revenue
+Company "1" --> "*" Expense
+Company "1" --> "*" CostCenter
+Company "1" --> "*" Document
+Company "1" --> "*" CalendarEvent
+Company "1" --> "*" Task
+Company "1" --> "*" Activity
+
+' Polymorphic note
+note as N1
+Documents / Tasks / CalendarEvents / Activities attach to any host entity via (entity_type, entity_id).
+Indexes recommended: (company_id, entity_type, entity_id)
+end note
+N1 .. Document
+N1 .. Task
+N1 .. CalendarEvent
+N1 .. Activity
+
+@enduml
