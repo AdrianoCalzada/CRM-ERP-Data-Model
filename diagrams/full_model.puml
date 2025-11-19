@@ -6,7 +6,7 @@ skinparam classAttributeIconSize 0
 skinparam shadowing false
 skinparam packageTitleFontColor #ffffff
 skinparam packageBorderColor #999999
-skinparam packageBackgroundColor #2b2b2b
+skinparam packageBackgroundColor #7f7f7fff
 skinparam classBackgroundColor #ffffff
 skinparam classBorderColor #555555
 skinparam ArrowColor #333333
