@@ -174,16 +174,6 @@ entity Invoice {
     }
 }
 
-entity EmailVerificationToken {
-    Token_id <<key>>
-    User_id
-    Token
-    Timeline {
-        Expires_at
-        Used_at
-    }
-    Created_at
-}
 ' Subscription & Billing entities
 
 entity Plan {
@@ -289,6 +279,28 @@ entity CostCenter {
         Created_at
         Updated_at
         Deleted_at
+    }
+}
+
+entity FinancialTransaction {
+    Transaction_id <<key>>
+    Company_id
+    Transaction_type
+    Related_entity {
+        Type
+        Id
+    }
+    Amount
+    Timeline {
+        Due_date
+        Paid_date
+    }
+    Status
+    Bank_account_id
+    Cost_center_id
+    Relationship_record {
+        Created_at
+        Updated_at
     }
 }
 
@@ -515,7 +527,7 @@ entity Activity {
     }
 }
 
-' Iventory & sales operations
+' Inventory & sales operations
 
 entity Sale {
     Sale_id <<key>>
@@ -623,7 +635,26 @@ entity Session {
     Created_at
 }
 
-entity PasswordVerificationToken {
+entity PasswordResetToken {
+    Token_id <<key>>
+    User_id
+    Token
+    Timeline {
+        Expires_at
+        Used_at
+    }
+    Created_at
+}
+
+entity EmailVerificationToken {
+    Token_id <<key>>
+    User_id
+    Token
+    Timeline {
+        Expires_at
+        Used_at
+    }
+    Created_at
 }
 
 entity OAuthAccount {
@@ -717,7 +748,13 @@ entity CompanySettings {
     Created_at
 }
 
-entity TenantSettings {
+entity TenantSetting {
+    Setting_id <<key>>
+    Company_id
+    Setting_key
+    Setting_value
+    Data_type
+    Updated_at
 }
 
 entity EmailTemplate {
@@ -771,243 +808,6 @@ entity CompanyDomain {
     Is_primary
     Verified_at
     Created_at
-}
-
-' Relationships
-
-relationship CompanyHasUser {
-}
-Company -(1,1)- CompanyHasUser
-CompanyHasUser -(1,M)- User
-
-relationship CompanyHasCompanySettings {
-}
-Company -(1,1)- CompanyHasCompanySettings
-CompanyHasCompanySettings -(1,1)- CompanySettings
-
-relationship CompanyHasTenantSetting {
-}
-Company -(1,1)- CompanyHasTenantSetting
-CompanyHasTenantSetting -(1,M)- TenantSettings
-
-relationship CompanyHasCompanyDomain {
-}
-Company -(1,1)- CompanyHasCompanyDomain
-CompanyHasCompanyDomain -(1,M)- CompanyDomain
-
-relationship UserHasSession {
-}
-User -(1,1)- UserHasSession
-UserHasSession -(1,M)- Session
-
-relationship UserHasOAuthAccount {
-}
-User -(1,1)- UserHasOAuthAccount
-UserHasOAuthAccount -(1,M)- OAuthAccount
-
-relationship UserHasTwoFactor {
-}
-User -(0,1)- UserHasTwoFactor
-UserHasTwoFactor -(1,1)- TwoFactor
-
-relationship UserHasPasswordResetToken {
-}
-User -(1,1)- UserHasPasswordResetToken
-UserHasPasswordResetToken -(1,M)- PasswordVerificationToken
-
-relationship UserHasEmailVerificationToken {
-}
-User -(1,1)- UserHasEmailVerificationToken
-UserHasEmailVerificationToken -(1,M)- EmailVerificationToken
-
-relationship UserHasRoleAssignment {
-}
-User -(M,N)- UserHasRoleAssignment
-UserHasRoleAssignment -(M,N)- UserRole
-
-relationship CompanyHasContact {
-}
-Company -(1,1)- CompanyHasContact
-CompanyHasContact -(1,M)- Contact
-
-relationship ContactHasDeal {
-}
-Contact -(1,1)- ContactHasDeal
-ContactHasDeal -(1,M)- Deal
-
-relationship UserOwnsDeal {
-}
-User -(1,1)- UserOwnsDeal
-UserOwnsDeal -(1,M)- Deal
-
-relationship ContactHasActivity {
-}
-Contact -(1,1)- ContactHasActivity
-ContactHasActivity -(1,M)- Activity
-
-relationship DealHasActivity {
-}
-Deal -(1,1)- DealHasActivity
-DealHasActivity -(1,M)- Activity
-
-relationship UserActsInActivity {
-}
-User -(1,1)- UserActsInActivity
-UserActsInActivity -(1,M)- Activity
-
-relationship ContactHasInvoice {
-}
-Contact -(1,1)- ContactHasInvoice
-ContactHasInvoice -(1,M)- Invoice
-
-relationship CompanyHasProduct {
-}
-Company -(1,1)- CompanyHasProduct
-CompanyHasProduct -(1,M)- Product
-
-relationship CompanyHasService {
-}
-Company -(1,1)- CompanyHasService
-CompanyHasService -(1,M)- Service
-
-relationship SaleHasSaleItem {
-}
-Sale -(1,1)- SaleHasSaleItem
-SaleHasSaleItem -(1,M)- SaleItem
-
-relationship ContactHasSale {
-}
-Contact -(1,1)- ContactHasSale
-ContactHasSale -(1,M)- Sale
-
-relationship ProductReferencedInSaleItem {
-}
-Product -(1,1)- ProductReferencedInSaleItem
-ProductReferencedInSaleItem -(1,M)- SaleItem
-
-relationship ServiceReferencedInSaleItem {
-}
-Service -(1,1)- ServiceReferencedInSaleItem
-ServiceReferencedInSaleItem -(1,M)- SaleItem
-
-relationship ProductHasInventoryMovement {
-}
-Product -(1,1)- ProductHasInventoryMovement
-ProductHasInventoryMovement -(1,M)- InventoryMovement
-
-relationship ContactSignsContract {
-}
-Contact -(1,1)- ContactSignsContract
-ContactSignsContract -(1,M)- Contract
-
-relationship ContractHasInstallment {
-}
-Contract -(1,1)- ContractHasInstallment
-ContractHasInstallment -(1,M)- ContractInstallment
-
-relationship InstallmentReceivesPayment {
-}
-ContractInstallment -(0,1)- InstallmentReceivesPayment
-InstallmentReceivesPayment -(1,M)- Payment
-
-relationship BankAccountSettlesPayment {
-}
-BankAccount -(1,1)- BankAccountSettlesPayment
-BankAccountSettlesPayment -(1,M)- Payment
-
-relationship PlanHasSubscription {
-}
-Plan -(1,1)- PlanHasSubscription
-PlanHasSubscription -(1,M)- Subscription
-
-relationship CompanyHasSubscription {
-}
-Company -(1,1)- CompanyHasSubscription
-CompanyHasSubscription -(1,M)- Subscription
-
-relationship InvoiceGeneratesRevenue {
-}
-Invoice -(0,1)- InvoiceGeneratesRevenue
-InvoiceGeneratesRevenue -(1,M)- Revenue
-
-relationship RevenueCategorizedByCategory {
-}
-RevenueCategory -(1,1)- RevenueCategorizedByCategory
-RevenueCategorizedByCategory -(1,M)- Revenue
-
-relationship RevenueAllocatedToCostCenter {
-}
-CostCenter -(1,1)- RevenueAllocatedToCostCenter
-RevenueAllocatedToCostCenter -(1,M)- Revenue
-
-relationship ExpenseCategorizedByCategory {
-}
-ExpenseCategory -(1,1)- ExpenseCategorizedByCategory
-ExpenseCategorizedByCategory -(1,M)- Expense
-
-relationship ExpenseAllocatedToCostCenter {
-}
-CostCenter -(1,1)- ExpenseAllocatedToCostCenter
-ExpenseAllocatedToCostCenter -(1,M)- Expense
-
-relationship CompanyHasBankAccount {
-}
-Company -(1,1)- CompanyHasBankAccount
-CompanyHasBankAccount -(1,M)- BankAccount
-
-relationship BankAccountHasStatementEntry {
-}
-BankAccount -(1,1)- BankAccountHasStatementEntry
-BankAccountHasStatementEntry -(1,M)- BankStatementEntry
-
-relationship CompanyHasIntegration {
-}
-Company -(1,1)- CompanyHasIntegration
-CompanyHasIntegration -(1,M)- Integration
-
-relationship CompanyHasWebhookEndpoint {
-}
-Company -(1,1)- CompanyHasWebhookEndpoint
-CompanyHasWebhookEndpoint -(1,M)- WebhookEndpoint
-
-relationship WebhookEndpointHasDelivery {
-}
-WebhookEndpoint -(1,1)- WebhookEndpointHasDelivery
-WebhookEndpointHasDelivery -(1,M)- WebhookDelivery
-
-relationship CompanyRunsJob {
-}
-Company -(1,1)- CompanyRunsJob
-CompanyRunsJob -(0,M)- JobQueue
-
-relationship CompanyHasNotification {
-}
-Company -(1,1)- CompanyHasNotification
-CompanyHasNotification -(1,M)- Notification
-
-relationship UserHasNotification {
-}
-User -(1,1)- UserHasNotification
-UserHasNotification -(1,M)- Notification
-
-relationship CompanyHasReportSchedule {
-}
-Company -(1,1)- CompanyHasReportSchedule
-CompanyHasReportSchedule -(1,M)- ReportSchedule
-
-relationship CompanyHasKPI {
-}
-Company -(1,1)- CompanyHasKPI
-CompanyHasKPI -(1,M)- KPI
-
-' Polymorphic attachment relationships (host entity -> artifact)
-relationship HostHasDocument {
-}
-relationship HostHasCalendarEvent {
-}
-relationship HostHasTask {
-}
-relationship HostHasActivityArtifact {
 }
 
 @endchen
