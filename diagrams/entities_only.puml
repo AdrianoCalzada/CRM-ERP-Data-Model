@@ -1,0 +1,168 @@
+@startchen
+
+' Core business entities
+
+entity Company {
+}
+
+entity User {
+}
+
+entity Contact {
+}
+
+entity Deal {
+}
+
+entity Product {
+}
+
+entity Service {
+}
+
+entity Invoice {
+}
+
+' Subscription & Billing entities
+
+entity Plan {
+}
+
+entity Subscription {
+}
+
+' Financial management entities
+
+entity Revenue {
+}
+
+entity RevenueCategory {
+}
+
+entity Expense {
+}
+
+entity ExpenseCategory {
+}
+
+entity CostCenter {
+}
+
+' Client lifecycle management
+
+entity ClientApplication {
+}
+
+entity CreditAnalysis {
+}
+
+' Contract & legal entities
+
+entity Contract {
+}
+
+entity ContractInstallment {
+}
+
+' Banking & cash flow
+
+entity BankAccount {
+}
+
+entity BankStatementEntry {
+}
+
+entity Payment {
+}
+
+' Document management
+
+entity Document {
+}
+
+' Operational management
+
+entity CalendarEvent {
+}
+
+entity Task {
+}
+
+entity Activity {
+}
+
+' Iventory & sales operations
+
+entity Sale {
+}
+
+entity SaleItem {
+}
+
+entity InventoryMovement {
+}
+
+' System & administration
+
+entity AuditLog {
+}
+
+entity UserRole {
+}
+
+entity Integration {
+}
+
+entity Notification {
+}
+
+' Authentication & security
+
+entity Session {
+}
+
+entity PasswordVerificationToken {
+}
+
+entity OAuthAccount {
+}
+
+entity TwoFactor {
+}
+
+' Webhooks & jobs
+
+entity WebhookEndpoint {
+}
+
+entity WebhookDelivery {
+}
+
+entity JobQueue {
+}
+
+' Settings & configuration
+
+entity CompanySettings {
+}
+
+entity TenantSettings {
+}
+
+entity EmailTemplate {
+}
+
+' Reporting & analytics
+
+entity ReportSchedule {
+}
+
+entity KPI {
+}
+
+' Multi-tenancy support
+
+entity CompanyDomain {
+}
+
+@endchen
