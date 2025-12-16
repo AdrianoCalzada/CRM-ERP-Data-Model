@@ -1,4 +1,4 @@
-@startuml
+@startuml full_logical_model
 
 entity Company {
     * company_id : UUID <<generated>> <<PK>>
@@ -437,6 +437,8 @@ entity Activity {
     due_date : date
     completed_date : date
     status : string
+    entity_type : string
+    entity_id : UUID
     --
     * created_at : timestamp
     * updated_at : timestamp
@@ -706,51 +708,51 @@ entity CompanyDomain {
 }
 
 ' Relationships
-Company ||..|{ User
-Company ||..|| CompanySettings
-Company ||..|{ TenantSetting
-Company ||..|{ CompanyDomain
-User ||..|{ Session
-User ||..|{ OAuthAccount
-User |o..|| TwoFactor
-User ||..|{ PasswordResetToken
-User ||..|{ EmailVerificationToken
-User }o..o{ UserRole
-Company ||..|{ Contact
-Contact ||..o{ Deal
-User ||..o{ Deal
-Contact ||..o{ Activity
-Deal ||..o{ Activity
-User ||..o{ Activity
-Contact ||..|{ Invoice
-Company ||..|{ Product
-Company ||..|{ Service
-Sale ||..|{ SaleItem
-Contact ||..|{ Sale
-Product |o..o{ SaleItem
-Service |o..o{ SaleItem
-Product ||..|{ InventoryMovement
-Contact ||..o{ Contract
-Contract ||..|{ ContractInstallment
-ContractInstallment |o..o{ Payment
-BankAccount ||..o{ Payment
-Plan ||..o{ Subscription
-Company ||..|{ Subscription
-Invoice |o..o{ Revenue
-RevenueCategory ||..o{ Revenue
-CostCenter ||..o{ Revenue
-ExpenseCategory ||..o{ Expense
-CostCenter ||..o{ Expense
-Company ||..|{ BankAccount
-BankAccount ||..|{ BankStatementEntry
-Company ||..o{ Integration
-Company ||..|{ WebhookEndpoint
-WebhookEndpoint ||..|{ WebhookDelivery
-Company ||..o{ JobQueue
-Company ||..|{ Notification
-User ||..|{ Notification
-Company ||..|{ ReportSchedule
-Company ||..|{ KPI
+Company ||--|{ User
+Company ||--|| CompanySettings
+Company ||--|{ TenantSetting
+Company ||--|{ CompanyDomain
+User ||--|{ Session
+User ||--|{ OAuthAccount
+User |o--|| TwoFactor
+User ||--|{ PasswordResetToken
+User ||--|{ EmailVerificationToken
+User }o--o{ UserRole
+Company ||--|{ Contact
+Contact ||--o{ Deal
+User ||--o{ Deal
+Contact ||--o{ Activity
+Deal ||--o{ Activity
+User ||--o{ Activity
+Contact ||--|{ Invoice
+Company ||--|{ Product
+Company ||--|{ Service
+Sale ||--|{ SaleItem
+Contact ||--|{ Sale
+Product |o--o{ SaleItem
+Service |o--o{ SaleItem
+Product ||--|{ InventoryMovement
+Contact ||--o{ Contract
+Contract ||--|{ ContractInstallment
+ContractInstallment |o--o{ Payment
+BankAccount ||--o{ Payment
+Plan ||--o{ Subscription
+Company ||--|{ Subscription
+Invoice |o--o{ Revenue
+RevenueCategory ||--o{ Revenue
+CostCenter ||--o{ Revenue
+ExpenseCategory ||--o{ Expense
+CostCenter ||--o{ Expense
+Company ||--|{ BankAccount
+BankAccount ||--|{ BankStatementEntry
+Company ||--o{ Integration
+Company ||--|{ WebhookEndpoint
+WebhookEndpoint ||--|{ WebhookDelivery
+Company ||--o{ JobQueue
+Company ||--|{ Notification
+User ||--|{ Notification
+Company ||--|{ ReportSchedule
+Company ||--|{ KPI
 
 ' Polymorphic relationships will be commented out as they cannot be directly drawn this way.
 ' Document is related to many entities.

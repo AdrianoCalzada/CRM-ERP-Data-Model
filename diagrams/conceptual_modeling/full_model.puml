@@ -1,4 +1,4 @@
-@startchen
+@startchen full_conceptual_model
 
 ' Core business entities
 
@@ -508,6 +508,10 @@ entity Activity {
         Completed_date
     }
     Status
+    Related_entity {
+        Entity_type
+        Entity_id
+    }
     Relationship_record {
         Created_at
         Updated_at
@@ -623,7 +627,15 @@ entity Session {
     Created_at
 }
 
-entity PasswordVerificationToken {
+entity PasswordResetToken {
+    Token_id <<key>>
+    User_id
+    Token
+    Timeline {
+        Expires_at
+        Used_at
+    }
+    Created_at
 }
 
 entity OAuthAccount {
@@ -714,10 +726,16 @@ entity CompanySettings {
         Security_settings
         Integration_settings
     }
-    Created_at
+    Updated_at
 }
 
-entity TenantSettings {
+entity TenantSetting {
+    setting_id <<key>>
+    company_id
+    setting_key
+    setting_value
+    data_type
+    updated_at
 }
 
 entity EmailTemplate {
