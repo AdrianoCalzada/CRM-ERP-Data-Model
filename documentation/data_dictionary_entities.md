@@ -8,7 +8,7 @@ This document provides a summary of the relationships between entities in the da
 |---|---|---|
 | User | CompanyHasUser | Defines the one-to-many relationship where a single company can have multiple users. |
 | CompanySettings | CompanyHasCompanySettings | Defines the one-to-one relationship where each company has a dedicated set of configuration settings. |
-| TenantSettings | CompanyHasTenantSetting | Defines the one-to-many relationship allowing a company to have multiple specific settings for its tenancy. |
+| TenantSetting | CompanyHasTenantSetting | Defines the one-to-many relationship allowing a company to have multiple specific settings for its tenancy. |
 | CompanyDomain | CompanyHasCompanyDomain | Defines the one-to-many relationship for associating multiple custom domains with a single company for white-labeling. |
 | Contact | CompanyHasContact | Defines the one-to-many relationship where a company can manage a list of multiple contacts (customers, leads, etc.). |
 | Product | CompanyHasProduct | Defines the one-to-many relationship for maintaining a catalog of products offered by the company. |
@@ -30,7 +30,7 @@ This document provides a summary of the relationships between entities in the da
 | Session | UserHasSession | A user can have multiple active sessions. |
 | OAuthAccount | UserHasOAuthAccount | A user can have multiple OAuth accounts for different providers. |
 | TwoFactor | UserHasTwoFactor | A user can have one two-factor authentication setup. |
-| PasswordVerificationToken | UserHasPasswordResetToken | A user can have multiple password reset tokens. |
+| PasswordResetToken | UserHasPasswordResetToken | A user can have multiple password reset tokens. |
 | EmailVerificationToken | UserHasEmailVerificationToken | A user can have multiple email verification tokens. |
 | UserRole | UserHasRoleAssignment | A user can be assigned multiple roles, and a role can be assigned to multiple users. |
 | Deal | UserOwnsDeal | A user can own multiple deals. |
@@ -162,3 +162,160 @@ This document provides a summary of the relationships between entities in the da
 |---|---|---|
 | Company | CompanyHasWebhookEndpoint | A webhook endpoint belongs to a single company. |
 | WebhookDelivery | WebhookEndpointHasDelivery | A webhook endpoint can have multiple delivery attempts. |
+
+## WebhookDelivery
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| WebhookEndpoint | WebhookEndpointHasDelivery | A delivery record is for a single webhook endpoint. |
+
+## Document
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| Company | CompanyHasDocument | A document belongs to a single company. |
+
+## Session
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| User | UserHasSession | A session is created by a single user. |
+
+## PasswordResetToken
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| User | UserHasPasswordResetToken | A password reset token is issued to a single user. |
+
+## EmailVerificationToken
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| User | UserHasEmailVerificationToken | An email verification token is issued to a single user. |
+
+## OAuthAccount
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| User | UserHasOAuthAccount | An OAuth account is linked to a single user. |
+
+## TwoFactor
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| User | UserHasTwoFactor | A two-factor authentication setup belongs to a single user. |
+
+## Activity
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| Company | CompanyHasActivity | An activity belongs to a single company. |
+| User | UserActsInActivity | An activity is performed by a single user. |
+| Contact | ContactHasActivity | An activity can be associated with a single contact. |
+| Deal | DealHasActivity | An activity can be associated with a single deal. |
+
+## CalendarEvent
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| Company | CompanyHasCalendarEvent | A calendar event belongs to a single company. |
+| User | UserCreatesCalendarEvent | A calendar event is created by a single user. |
+
+## Task
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| Company | CompanyHasTask | A task belongs to a single company. |
+| User | UserIsAssignedTask | A task is assigned to a single user. |
+
+## Sale
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| Company | CompanyHasSale | A sale belongs to a single company. |
+| Contact | ContactHasSale | A sale is made to a single contact. |
+| SaleItem | SaleHasSaleItem | A sale can have multiple sale items. |
+
+## SaleItem
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| Sale | SaleHasSaleItem | A sale item belongs to a single sale. |
+| Product | ProductReferencedInSaleItem | A sale item can reference a single product. |
+| Service | ServiceReferencedInSaleItem | A sale item can reference a single service. |
+
+## InventoryMovement
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| Company | CompanyHasInventoryMovement | An inventory movement belongs to a single company. |
+| Product | ProductHasInventoryMovement | An inventory movement is for a single product. |
+
+## AuditLog
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| Company | CompanyHasAuditLog | An audit log entry belongs to a single company. |
+| User | UserActionsInAuditLog | An audit log entry can record actions by a single user. |
+
+## UserRole
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| Company | CompanyHasUserRole | A role belongs to a single company. |
+| User | UserHasRoleAssignment | A user can be assigned multiple roles, and a role can be assigned to multiple users. |
+
+## Integration
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| Company | CompanyHasIntegration | An integration belongs to a single company. |
+
+## Notification
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| Company | CompanyHasNotification | A notification belongs to a single company. |
+| User | UserHasNotification | A notification is sent to a single user. |
+
+## CompanySettings
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| Company | CompanyHasCompanySettings | Settings belong to a single company (one-to-one relationship). |
+
+## TenantSetting
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| Company | CompanyHasTenantSetting | A tenant setting belongs to a single company. |
+
+## EmailTemplate
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| Company | CompanyHasEmailTemplate | An email template belongs to a single company. |
+
+## CompanyDomain
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| Company | CompanyHasCompanyDomain | A company domain is associated with a single company. |
+
+## ReportSchedule
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| Company | CompanyHasReportSchedule | A report schedule belongs to a single company. |
+
+## KPI
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| Company | CompanyHasKPI | A KPI belongs to a single company. |
+
+## JobQueue
+
+| Relationship | Relationship Name | Description |
+|---|---|---|
+| Company | CompanyRunsJob | A job can be associated with a single company (optional). |

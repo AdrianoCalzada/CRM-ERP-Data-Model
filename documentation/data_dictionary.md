@@ -414,10 +414,401 @@
 
 ## Document
 
-**Description**: Provides centralized storage for files and documents, supporting compliance and record-keeping. This is a polymorphic entity.
+**Description**: Provides centralized storage for files and documents, supporting compliance and record-keeping. This is a polymorphic entity that can be associated with any entity through entity_type and entity_id.
 
 | Attribute | Data Type | Length (Bytes) | Restrictions | Description |
 |---|---|---|---|---|
+| document_id | UUID | 16 | PK, NOT NULL | Unique identifier for the document. |
+| company_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the company. |
+| uploaded_by | UUID | 16 | FK | Foreign key referencing the user who uploaded the document. |
+| entity_type | STRING | 100 | NOT NULL | The type of entity this document is associated with (polymorphic reference). |
+| entity_id | UUID | 16 | NOT NULL | The ID of the entity this document is associated with (polymorphic reference). |
+| document_type | VARCHAR | 100 | | The type or category of the document (e.g., 'Invoice', 'Contract', 'Receipt'). |
+| file_name | VARCHAR | 255 | NOT NULL | The original name of the uploaded file. |
+| file_path | VARCHAR | 255 | NOT NULL | The storage path or location of the file. |
+| file_size | INTEGER | 4 | | The size of the file in bytes. |
+| mime_type | VARCHAR | 100 | | The MIME type of the file (e.g., 'application/pdf'). |
+| storage_provider | VARCHAR | 100 | | The cloud storage provider (e.g., 'S3', 'Azure Blob'). |
+| bucket | VARCHAR | 255 | | The bucket or container name in the storage provider. |
+| checksum | VARCHAR | 255 | | A checksum or hash of the file for integrity verification. |
+| version | INTEGER | 4 | | The version number of the document for versioning support. |
+| uploaded_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the document was uploaded. |
+| expires_at | TIMESTAMP | 8 | | Timestamp when the document access expires. |
+| deleted_at | TIMESTAMP | 8 | NULL | Timestamp for soft deletion. If NULL, the record is active. |
+
+## Session
+
+**Description**: Represents user sessions for tracking active logins and session management.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| session_id | UUID | 16 | PK, NOT NULL | Unique identifier for the session. |
+| user_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the user. |
+| expires_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the session expires. |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the session was created. |
+
+## PasswordResetToken
+
+**Description**: Manages password reset tokens for secure password recovery.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| token_id | UUID | 16 | PK, NOT NULL | Unique identifier for the token. |
+| user_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the user. |
+| token | VARCHAR | 255 | NOT NULL, UNIQUE | The unique token string for password reset. |
+| expires_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the token expires. |
+| used_at | TIMESTAMP | 8 | | Timestamp when the token was used. |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the token was created. |
+
+## EmailVerificationToken
+
+**Description**: Manages email verification tokens for account confirmation.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| token_id | UUID | 16 | PK, NOT NULL | Unique identifier for the token. |
+| user_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the user. |
+| token | VARCHAR | 255 | NOT NULL, UNIQUE | The unique token string for email verification. |
+| expires_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the token expires. |
+| used_at | TIMESTAMP | 8 | | Timestamp when the token was used. |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the token was created. |
+
+## OAuthAccount
+
+**Description**: Manages OAuth provider integrations for social login and third-party authentication.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| oauth_account_id | UUID | 16 | PK, NOT NULL | Unique identifier for the OAuth account. |
+| user_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the user. |
+| provider | VARCHAR | 100 | NOT NULL | The OAuth provider name (e.g., 'Google', 'GitHub'). |
+| provider_user_id | VARCHAR | 255 | NOT NULL | The user ID from the OAuth provider. |
+| access_token | TEXT | | | The access token from the OAuth provider. |
+| refresh_token | TEXT | | | The refresh token for obtaining new access tokens. |
+| expires_at | TIMESTAMP | 8 | | Timestamp when the access token expires. |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the OAuth account was created. |
+| updated_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the OAuth account was last updated. |
+
+## TwoFactor
+
+**Description**: Manages two-factor authentication settings for enhanced account security.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| two_factor_id | UUID | 16 | PK, NOT NULL | Unique identifier for the two-factor setup. |
+| user_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the user. |
+| totp_secret | VARCHAR | 255 | | The secret key for time-based one-time passwords (TOTP). |
+| backup_codes | JSON | | | JSON array of backup recovery codes. |
+| enabled_at | TIMESTAMP | 8 | | Timestamp when two-factor authentication was enabled. |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the two-factor record was created. |
+
+## UserRole
+
+**Description**: Represents roles with associated permissions for role-based access control.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| role_id | UUID | 16 | PK, NOT NULL | Unique identifier for the role. |
+| company_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the company. |
+| name | VARCHAR | 255 | NOT NULL | The name of the role (e.g., 'Admin', 'Manager'). |
+| permissions | JSON | | | A JSON object detailing the permissions granted to this role. |
+| is_system_role | BOOLEAN | 1 | | Flag indicating if the role is a system-defined role. |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the role was created. |
+
+## Activity
+
+**Description**: Tracks activities such as calls, emails, meetings, and notes related to business processes. This is a polymorphic entity.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| activity_id | UUID | 16 | PK, NOT NULL | Unique identifier for the activity. |
+| company_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the company. |
+| user_id | UUID | 16 | FK | Foreign key referencing the user who performed the activity. |
+| contact_id | UUID | 16 | FK | Foreign key referencing the associated contact. |
+| deal_id | UUID | 16 | FK | Foreign key referencing the associated deal. |
+| type | VARCHAR | 50 | | The type of activity (e.g., 'Call', 'Email', 'Meeting', 'Note'). |
+| subject | VARCHAR | 255 | | The subject of the activity. |
+| description | TEXT | | | A detailed description of the activity. |
+| content | TEXT | | | The content or body of the activity. |
+| due_date | DATE | 4 | | The due date for the activity. |
+| completed_date | DATE | 4 | | The date the activity was completed. |
+| status | VARCHAR | 50 | | The status of the activity (e.g., 'Pending', 'Completed'). |
+| entity_type | VARCHAR | 100 | | The type of entity this activity is related to (polymorphic reference). |
+| entity_id | UUID | 16 | | The ID of the entity this activity is related to (polymorphic reference). |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the activity record was created. |
+| updated_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the activity record was last updated. |
+| deleted_at | TIMESTAMP | 8 | NULL | Timestamp for soft deletion. If NULL, the record is active. |
+
+## CalendarEvent
+
+**Description**: Manages calendar events and scheduling for team coordination.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| event_id | UUID | 16 | PK, NOT NULL | Unique identifier for the calendar event. |
+| company_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the company. |
+| created_by | UUID | 16 | FK | Foreign key referencing the user who created the event. |
+| title | VARCHAR | 255 | NOT NULL | The title of the event. |
+| description | TEXT | | | A detailed description of the event. |
+| start_time | TIMESTAMP | 8 | NOT NULL | The start time of the event. |
+| end_time | TIMESTAMP | 8 | NOT NULL | The end time of the event. |
+| entity_type | VARCHAR | 100 | | The type of entity this event is associated with (polymorphic reference). |
+| entity_id | UUID | 16 | | The ID of the entity this event is associated with (polymorphic reference). |
+| reminder_sent | BOOLEAN | 1 | | Flag indicating if a reminder has been sent. |
+| status | VARCHAR | 50 | | The status of the event (e.g., 'Scheduled', 'Completed', 'Cancelled'). |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the event was created. |
+
+## Task
+
+**Description**: Manages tasks and to-do items for project and work management.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| task_id | UUID | 16 | PK, NOT NULL | Unique identifier for the task. |
+| company_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the company. |
+| assigned_to | UUID | 16 | FK | Foreign key referencing the user assigned to the task. |
+| title | VARCHAR | 255 | NOT NULL | The title of the task. |
+| description | TEXT | | | A detailed description of the task. |
+| due_date | DATE | 4 | | The due date for the task. |
+| priority | VARCHAR | 50 | | The priority level of the task (e.g., 'Low', 'Medium', 'High'). |
+| status | VARCHAR | 50 | | The status of the task (e.g., 'Open', 'In Progress', 'Completed'). |
+| entity_type | VARCHAR | 100 | | The type of entity this task is related to (polymorphic reference). |
+| entity_id | UUID | 16 | | The ID of the entity this task is related to (polymorphic reference). |
+| completed_at | TIMESTAMP | 8 | | Timestamp when the task was completed. |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the task record was created. |
+| deleted_at | TIMESTAMP | 8 | NULL | Timestamp for soft deletion. If NULL, the record is active. |
+
+## Sale
+
+**Description**: Represents sales transactions and completed orders.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| sale_id | UUID | 16 | PK, NOT NULL | Unique identifier for the sale. |
+| company_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the company. |
+| contact_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the contact being sold to. |
+| total_amount | DECIMAL | 18, 2 | NOT NULL | The total amount of the sale. |
+| sale_date | DATE | 4 | NOT NULL | The date the sale was made. |
+| status | VARCHAR | 50 | | The status of the sale (e.g., 'Pending', 'Completed', 'Cancelled'). |
+| payment_terms | VARCHAR | 100 | | The payment terms agreed upon. |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the sale record was created. |
+| deleted_at | TIMESTAMP | 8 | NULL | Timestamp for soft deletion. If NULL, the record is active. |
+
+## SaleItem
+
+**Description**: Represents line items within a sale, detailing products or services sold.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| sale_item_id | UUID | 16 | PK, NOT NULL | Unique identifier for the sale item. |
+| sale_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the parent sale. |
+| product_id | UUID | 16 | FK | Foreign key referencing the product (if applicable). |
+| service_id | UUID | 16 | FK | Foreign key referencing the service (if applicable). |
+| quantity | INTEGER | 4 | NOT NULL | The quantity of the item sold. |
+| unit_price | DECIMAL | 18, 2 | NOT NULL | The price per unit. |
+| total_amount | DECIMAL | 18, 2 | NOT NULL | The total amount for this line item. |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the sale item was created. |
+
+## InventoryMovement
+
+**Description**: Tracks inventory changes such as stock increases, decreases, and transfers.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| movement_id | UUID | 16 | PK, NOT NULL | Unique identifier for the inventory movement. |
+| company_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the company. |
+| product_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the product. |
+| movement_type | VARCHAR | 50 | | The type of movement (e.g., 'In', 'Out', 'Transfer'). |
+| quantity | INTEGER | 4 | NOT NULL | The quantity of items moved. |
+| unit_cost | DECIMAL | 18, 2 | | The cost per unit for this movement. |
+| reference_id | UUID | 16 | | A reference ID linking to a related transaction (Sale, Purchase, etc.). |
+| notes | TEXT | | | Additional notes about the inventory movement. |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the movement was recorded. |
+
+## AuditLog
+
+**Description**: Maintains audit trails for compliance and security monitoring of system actions.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| log_id | BIGINT | 8 | PK, NOT NULL | Unique identifier for the audit log entry. |
+| company_id | UUID | 16 | FK | Foreign key referencing the company. |
+| user_id | UUID | 16 | FK | Foreign key referencing the user who performed the action. |
+| action | VARCHAR | 255 | NOT NULL | The action performed (e.g., 'CREATE', 'UPDATE', 'DELETE'). |
+| entity_type | VARCHAR | 100 | | The type of entity affected by the action. |
+| entity_id | UUID | 16 | | The ID of the entity affected by the action. |
+| old_values | JSON | | | JSON representation of the old values before the change. |
+| new_values | JSON | | | JSON representation of the new values after the change. |
+| ip_address | VARCHAR | 45 | | The IP address from which the action was performed. |
+| user_agent | TEXT | | | The user agent string of the request. |
+| timestamp | TIMESTAMP | 8 | NOT NULL | Timestamp when the action was performed. |
+
+## Integration
+
+**Description**: Manages third-party integrations and API connections.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| integration_id | UUID | 16 | PK, NOT NULL | Unique identifier for the integration. |
+| company_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the company. |
+| service_name | VARCHAR | 255 | NOT NULL | The name of the external service (e.g., 'Stripe', 'Slack'). |
+| api_key | TEXT | | | The API key or credentials for the integration. |
+| config_data | JSON | | | Additional configuration data in JSON format. |
+| is_active | BOOLEAN | 1 | NOT NULL | Flag indicating if the integration is active. |
+| last_sync_at | TIMESTAMP | 8 | | Timestamp of the last synchronization. |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the integration was created. |
+
+## Notification
+
+**Description**: Manages notifications for users about system events and important updates.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| notification_id | UUID | 16 | PK, NOT NULL | Unique identifier for the notification. |
+| company_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the company. |
+| user_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the user receiving the notification. |
+| title | VARCHAR | 255 | NOT NULL | The title of the notification. |
+| message | TEXT | | | The message content of the notification. |
+| type | VARCHAR | 50 | | The type of notification (e.g., 'Info', 'Warning', 'Error'). |
+| is_read | BOOLEAN | 1 | NOT NULL | Flag indicating if the notification has been read. |
+| action_url | VARCHAR | 255 | | A URL to an action related to the notification. |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the notification was created. |
+
+## WebhookEndpoint
+
+**Description**: Defines webhook endpoints for outgoing event notifications to external systems.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| endpoint_id | UUID | 16 | PK, NOT NULL | Unique identifier for the webhook endpoint. |
+| company_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the company. |
+| url | VARCHAR | 255 | NOT NULL | The URL of the webhook endpoint. |
+| event_types | JSON | | | A JSON array of event types this endpoint subscribes to. |
+| secret | VARCHAR | 255 | | A secret key for validating webhook signatures. |
+| is_active | BOOLEAN | 1 | NOT NULL | Flag indicating if the endpoint is active. |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the endpoint was created. |
+
+## WebhookDelivery
+
+**Description**: Tracks webhook delivery attempts and their outcomes for monitoring and debugging.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| delivery_id | UUID | 16 | PK, NOT NULL | Unique identifier for the delivery attempt. |
+| endpoint_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the webhook endpoint. |
+| event_name | VARCHAR | 100 | | The name of the event being delivered. |
+| payload | JSON | | | The JSON payload sent with the webhook. |
+| attempt | INTEGER | 4 | | The attempt number for this delivery. |
+| status | VARCHAR | 50 | | The status of the delivery (e.g., 'Success', 'Failed', 'Pending'). |
+| error | TEXT | | | Error message if the delivery failed. |
+| next_retry_at | TIMESTAMP | 8 | | Timestamp for the next retry attempt. |
+| idempotency_key | VARCHAR | 255 | | Key to ensure idempotent processing. |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the delivery record was created. |
+
+## JobQueue
+
+**Description**: Manages background jobs and asynchronous task processing.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| job_id | BIGINT | 8 | PK, NOT NULL | Unique identifier for the job. |
+| type | VARCHAR | 100 | NOT NULL | The type of job to execute (e.g., 'SendEmail', 'GenerateReport'). |
+| payload | JSON | | | JSON data to be passed to the job. |
+| run_at | TIMESTAMP | 8 | | Timestamp when the job should be executed. |
+| attempts | INTEGER | 4 | | The number of attempts made to execute the job. |
+| status | VARCHAR | 50 | | The status of the job (e.g., 'Pending', 'Processing', 'Completed', 'Failed'). |
+| last_error | TEXT | | | The error message from the last failed attempt. |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the job was created. |
+| updated_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the job was last updated. |
+
+## CompanySettings
+
+**Description**: Stores company-level configuration and settings specific to each tenant.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| company_id | UUID | 16 | PK, FK, NOT NULL | Foreign key and primary key referencing the company. One-to-one relationship. |
+| razao_social | VARCHAR | 255 | | The legal business name (Brazil-specific). |
+| cnpj | VARCHAR | 18 | | The corporate tax registration number (Brazil-specific). |
+| endereco | TEXT | | | The full address of the company (Brazil-specific). |
+| telefone | VARCHAR | 20 | | The phone number for the company. |
+| logo_ref | VARCHAR | 255 | | A reference or URL to the company logo. |
+| theme_settings | JSON | | | JSON object storing UI theme preferences. |
+| security_settings | JSON | | | JSON object storing security-related settings. |
+| integration_settings | JSON | | | JSON object storing integration preferences. |
+| updated_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the settings were last updated. |
+
+## TenantSetting
+
+**Description**: Stores tenant-specific key-value configuration settings.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| setting_id | UUID | 16 | PK, NOT NULL | Unique identifier for the setting. |
+| company_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the company. |
+| setting_key | VARCHAR | 255 | NOT NULL | The configuration key name. |
+| setting_value | TEXT | | | The configuration value. |
+| data_type | VARCHAR | 50 | | The data type of the setting (e.g., 'String', 'Integer', 'Boolean'). |
+| updated_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the setting was last updated. |
+
+## EmailTemplate
+
+**Description**: Stores email templates for automated communications.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| template_id | UUID | 16 | PK, NOT NULL | Unique identifier for the email template. |
+| company_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the company. |
+| name | VARCHAR | 255 | NOT NULL | The name of the template (e.g., 'Welcome Email', 'Password Reset'). |
+| subject | VARCHAR | 255 | | The email subject line with potential variables. |
+| body | TEXT | | | The email body content with potential variables. |
+| variables | JSON | | | JSON array of available template variables. |
+| is_active | BOOLEAN | 1 | NOT NULL | Flag indicating if the template is active. |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the template was created. |
+
+## CompanyDomain
+
+**Description**: Manages custom domains associated with companies for white-labeling and multi-domain support.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| domain_id | UUID | 16 | PK, NOT NULL | Unique identifier for the domain record. |
+| company_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the company. |
+| domain_name | VARCHAR | 255 | NOT NULL, UNIQUE | The domain name (e.g., 'mycompany.com'). |
+| is_primary | BOOLEAN | 1 | | Flag indicating if this is the primary domain for the company. |
+| verified_at | TIMESTAMP | 8 | | Timestamp when the domain was verified. |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the domain was added. |
+
+## ReportSchedule
+
+**Description**: Manages scheduled reports and their execution parameters.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| schedule_id | UUID | 16 | PK, NOT NULL | Unique identifier for the report schedule. |
+| company_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the company. |
+| report_type | VARCHAR | 100 | NOT NULL | The type of report (e.g., 'Sales', 'Inventory', 'Revenue'). |
+| frequency | VARCHAR | 50 | | The frequency of execution (e.g., 'Daily', 'Weekly', 'Monthly'). |
+| parameters | JSON | | | JSON object storing report parameters and filters. |
+| last_run_at | TIMESTAMP | 8 | | Timestamp of the last execution. |
+| next_run_at | TIMESTAMP | 8 | | Timestamp of the next scheduled execution. |
+| is_active | BOOLEAN | 1 | NOT NULL | Flag indicating if the schedule is active. |
+| created_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the schedule was created. |
+
+## KPI
+
+**Description**: Defines and tracks Key Performance Indicators for business analytics.
+
+| Attribute | Data Type | Length (Bytes) | Restrictions | Description |
+|---|---|---|---|---|
+| kpi_id | UUID | 16 | PK, NOT NULL | Unique identifier for the KPI. |
+| company_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the company. |
+| name | VARCHAR | 255 | NOT NULL | The name of the KPI (e.g., 'Monthly Revenue', 'Customer Acquisition Cost'). |
+| calculation_query | TEXT | | | The query or formula to calculate the KPI value. |
+| target_value | DECIMAL | 18, 2 | | The target or goal value for the KPI. |
+| current_value | DECIMAL | 18, 2 | | The current calculated value of the KPI. |
+| period | VARCHAR | 50 | | The period for the KPI (e.g., 'Daily', 'Monthly', 'Yearly'). |
+| updated_at | TIMESTAMP | 8 | NOT NULL | Timestamp when the KPI value was last updated. |
 | document_id | UUID | 16 | PK, NOT NULL | Unique identifier for the document. |
 | company_id | UUID | 16 | FK, NOT NULL | Foreign key referencing the company. |
 | entity_type | VARCHAR | 50 | NOT NULL | The type of entity this document is associated with (e.g., 'Contact', 'Contract'). |
