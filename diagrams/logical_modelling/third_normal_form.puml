@@ -1,0 +1,813 @@
+@startuml third_normal_form
+
+entity Company {
+    * company_id : UUID <<generated>> <<PK>>
+    * name : string
+    --
+    address_street : string
+    address_number : string
+    address_postal_code : string
+    address_neighborhood : string
+    address_city : string
+    address_state : string
+    --
+    website : string
+    * created_at : timestamp
+    * updated_at : timestamp
+    deleted_at : timestamp
+}
+
+entity User {
+    * user_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    * email : string <<unique>>
+    * password_hash : string
+    --
+    first_name : string
+    last_name : string
+    phone : string
+    role : string
+    avatar_url : string
+    email_verified : boolean
+    * is_active : boolean
+    last_login_at : timestamp
+    --
+    * created_at : timestamp
+    * updated_at : timestamp
+    deleted_at : timestamp
+}
+
+entity Contact {
+    * contact_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    --
+    type : string
+    first_name : string
+    last_name : string
+    email : string
+    phone : string
+    company_name : string
+    job_title : string
+    department : string
+    source : string
+    status : string
+    --
+    address_street : string
+    address_city : string
+    address_country : string
+    --
+    notes : text
+    --
+    * created_at : timestamp
+    * updated_at : timestamp
+    deleted_at : timestamp
+}
+
+entity Deal {
+    * deal_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    * contact_id : UUID <<FK>>
+    * owner_user_id : UUID <<FK>>
+    --
+    * name : string
+    description : text
+    value : decimal
+    stage : string
+    probability : decimal
+    expected_close_date : date
+    actual_close_date : date
+    status : string
+    loss_reason : text
+    --
+    * created_at : timestamp
+    * updated_at : timestamp
+    deleted_at : timestamp
+}
+
+entity Product {
+    * product_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    --
+    type : string
+    * name : string
+    description : text
+    sku : string <<unique>>
+    category : string
+    * price : decimal
+    cost : decimal
+    tax_rate : decimal
+    * is_active : boolean
+    * track_inventory : boolean
+    --
+    * created_at : timestamp
+    * updated_at : timestamp
+    deleted_at : timestamp
+}
+
+entity Service {
+    * service_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    --
+    * name : string
+    description : text
+    * price : decimal
+    cost : decimal
+    duration : integer
+    category : string
+    * is_active : boolean
+    --
+    * created_at : timestamp
+    * updated_at : timestamp
+    deleted_at : timestamp
+}
+
+entity Invoice {
+    * invoice_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    * contact_id : UUID <<FK>>
+    --
+    invoice_number : string <<unique>>
+    type : string
+    status : string
+    * issue_date : date
+    due_date : date
+    paid_date : date
+    * subtotal : decimal
+    tax_amount : decimal
+    * total_amount : decimal
+    notes : text
+    terms_and_conditions : text
+    idempotency_key : string
+    --
+    * created_at : timestamp
+    * updated_at : timestamp
+    deleted_at : timestamp
+}
+
+entity Plan {
+    * plan_id : UUID <<generated>> <<PK>>
+    * name : string <<unique>>
+    --
+    price_monthly : decimal
+    price_yearly : decimal
+    * is_active : boolean
+    * created_at : timestamp
+}
+
+entity Subscription {
+    * subscription_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    * plan_id : UUID <<FK>>
+    --
+    billing_cycle : string
+    status : string
+    start_date : date
+    end_date : date
+    next_billing_date : date
+    stripe_subscription_id : string <<unique>>
+    idempotency_key : string
+    --
+    * created_at : timestamp
+}
+
+entity Revenue {
+    * revenue_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    contact_id : UUID <<FK>>
+    invoice_id : UUID <<FK>>
+    cost_center_id : UUID <<FK>>
+    --
+    description : text
+    * amount : decimal
+    * revenue_date : date
+    category : string
+    --
+    * created_at : timestamp
+    deleted_at : timestamp
+}
+
+entity RevenueCategory {
+    * category_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    * name : string
+    description : text
+    * is_active : boolean
+    * created_at : timestamp
+}
+
+entity Expense {
+    * expense_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    cost_center_id : UUID <<FK>>
+    --
+    description : text
+    category : string
+    * amount : decimal
+    * expense_date : date
+    vendor : string
+    payment_method : string
+    status : string
+    --
+    * created_at : timestamp
+    * updated_at : timestamp
+    deleted_at : timestamp
+}
+
+entity ExpenseCategory {
+    * category_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    * name : string
+    description : text
+    * is_active : boolean
+    * created_at : timestamp
+}
+
+entity CostCenter {
+    * cost_center_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    * name : string
+    --
+    description : text
+    budget : decimal
+    color : string
+    * is_active : boolean
+    --
+    * created_at : timestamp
+    * updated_at : timestamp
+    deleted_at : timestamp
+}
+
+entity ClientApplication {
+    * application_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    contact_id : UUID <<FK>>
+    --
+    first_name : string
+    last_name : string
+    email : string
+    phone : string
+    cpf : string
+    cnpj : string
+    company_age : integer
+    company_size : string
+    segment : string
+    revenue : decimal
+    has_physical_location : boolean
+    credit_purpose : text
+    notes : text
+    status : string
+    converted_at : timestamp
+    --
+    * created_at : timestamp
+    * updated_at : timestamp
+    deleted_at : timestamp
+}
+
+entity CreditAnalysis {
+    * analysis_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    * client_application_id : UUID <<FK>>
+    analyst_user_id : UUID <<FK>>
+    --
+    risk_score : decimal
+    approved_amount : decimal
+    interest_rate : decimal
+    justification : text
+    status : string
+    --
+    * created_at : timestamp
+}
+
+entity Contract {
+    * contract_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    * contact_id : UUID <<FK>>
+    --
+    * total_value : decimal
+    interest_rate : decimal
+    installment_count : integer
+    start_date : date
+    end_date : date
+    status : string
+    --
+    * created_at : timestamp
+    * updated_at : timestamp
+    deleted_at : timestamp
+}
+
+entity ContractInstallment {
+    * installment_id : UUID <<generated>> <<PK>>
+    * contract_id : UUID <<FK>>
+    --
+    * installment_number : integer
+    * due_date : date
+    * amount : decimal
+    status : string
+    paid_date : date
+    late_fee : decimal
+    --
+    * created_at : timestamp
+}
+
+entity BankAccount {
+    * bank_account_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    --
+    * bank_name : string
+    agency : string
+    account_number : string
+    account_type : string
+    balance : decimal
+    * is_active : boolean
+    --
+    * created_at : timestamp
+    * updated_at : timestamp
+    deleted_at : timestamp
+}
+
+entity BankStatementEntry {
+    * entry_id : UUID <<generated>> <<PK>>
+    * bank_account_id : UUID <<FK>>
+    --
+    * transaction_date : date
+    description : text
+    * amount : decimal
+    transaction_type : string
+    balance_after : decimal
+    reference_number : string
+    --
+    * created_at : timestamp
+}
+
+entity Payment {
+    * payment_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    contract_installment_id : UUID <<FK>>
+    bank_account_id : UUID <<FK>>
+    --
+    * amount : decimal
+    * payment_date : date
+    payment_method : string
+    reference_number : string
+    status : string
+    idempotency_key : string
+    --
+    * created_at : timestamp
+}
+
+entity Document {
+    * document_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    uploaded_by : UUID <<FK>>
+    --
+    * entity_type : string
+    * entity_id : UUID
+    document_type : string
+    * file_name : string
+    * file_path : string
+    file_size : integer
+    mime_type : string
+    storage_provider : string
+    bucket : string
+    checksum : string
+    version : integer
+    * uploaded_at : timestamp
+    expires_at : timestamp
+    deleted_at : timestamp
+}
+
+entity CalendarEvent {
+    * event_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    created_by : UUID <<FK>>
+    --
+    * title : string
+    description : text
+    * start_time : timestamp
+    * end_time : timestamp
+    entity_type : string
+    entity_id : UUID
+    reminder_sent : boolean
+    status : string
+    --
+    * created_at : timestamp
+}
+
+entity Task {
+    * task_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    assigned_to : UUID <<FK>>
+    --
+    * title : string
+    description : text
+    due_date : date
+    priority : string
+    status : string
+    entity_type : string
+    entity_id : UUID
+    completed_at : timestamp
+    --
+    * created_at : timestamp
+    deleted_at : timestamp
+}
+
+entity Activity {
+    * activity_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    user_id : UUID <<FK>>
+    contact_id : UUID <<FK>>
+    deal_id : UUID <<FK>>
+    --
+    type : string
+    subject : string
+    description : text
+    content : text
+    due_date : date
+    completed_date : date
+    status : string
+    entity_type : string
+    entity_id : UUID
+    --
+    * created_at : timestamp
+    * updated_at : timestamp
+    deleted_at : timestamp
+}
+
+entity Sale {
+    * sale_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    * contact_id : UUID <<FK>>
+    --
+    * total_amount : decimal
+    * sale_date : date
+    status : string
+    payment_terms : string
+    --
+    * created_at : timestamp
+    deleted_at : timestamp
+}
+
+entity SaleItem {
+    * sale_item_id : UUID <<generated>> <<PK>>
+    * sale_id : UUID <<FK>>
+    product_id : UUID <<FK>>
+    service_id : UUID <<FK>>
+    --
+    * quantity : integer
+    * unit_price : decimal
+    * total_amount : decimal
+    --
+    * created_at : timestamp
+}
+
+entity InventoryMovement {
+    * movement_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    * product_id : UUID <<FK>>
+    --
+    movement_type : string
+    * quantity : integer
+    unit_cost : decimal
+    reference_id : UUID
+    notes : text
+    --
+    * created_at : timestamp
+}
+
+entity AuditLog {
+    * log_id : integer <<generated>> <<PK>>
+    company_id : UUID <<FK>>
+    user_id : UUID <<FK>>
+    --
+    * action : string
+    entity_type : string
+    entity_id : UUID
+    old_values : json
+    new_values : json
+    ip_address : string
+    user_agent : text
+    * timestamp : timestamp
+}
+
+entity UserRole {
+    * role_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    --
+    * name : string
+    permissions : json
+    is_system_role : boolean
+    --
+    * created_at : timestamp
+}
+
+entity Integration {
+    * integration_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    --
+    * service_name : string
+    api_key : string
+    config_data : json
+    * is_active : boolean
+    last_sync_at : timestamp
+    --
+    * created_at : timestamp
+}
+
+entity Notification {
+    * notification_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    * user_id : UUID <<FK>>
+    --
+    * title : string
+    message : text
+    type : string
+    * is_read : boolean
+    action_url : string
+    --
+    * created_at : timestamp
+}
+
+entity Session {
+    * session_id : UUID <<generated>> <<PK>>
+    * user_id : UUID <<FK>>
+    * expires_at : timestamp
+    * created_at : timestamp
+}
+
+entity PasswordResetToken {
+    * token_id : UUID <<generated>> <<PK>>
+    * user_id : UUID <<FK>>
+    * token : string <<unique>>
+    * expires_at : timestamp
+    used_at : timestamp
+    * created_at : timestamp
+}
+
+entity EmailVerificationToken {
+    * token_id : UUID <<generated>> <<PK>>
+    * user_id : UUID <<FK>>
+    * token : string <<unique>>
+    * expires_at : timestamp
+    used_at : timestamp
+    * created_at : timestamp
+}
+
+entity OAuthAccount {
+    * oauth_account_id : UUID <<generated>> <<PK>>
+    * user_id : UUID <<FK>>
+    --
+    * provider : string
+    * provider_user_id : string
+    access_token : text
+    refresh_token : text
+    expires_at : timestamp
+    --
+    * created_at : timestamp
+    * updated_at : timestamp
+}
+
+entity TwoFactor {
+    * two_factor_id : UUID <<generated>> <<PK>>
+    * user_id : UUID <<FK>>
+    --
+    totp_secret : string
+    enabled_at : timestamp
+    --
+    * created_at : timestamp
+}
+
+entity WebhookEndpoint {
+    * endpoint_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    --
+    * url : string
+    secret : string
+    * is_active : boolean
+    --
+    * created_at : timestamp
+}
+
+entity WebhookDelivery {
+    * delivery_id : UUID <<generated>> <<PK>>
+    * endpoint_id : UUID <<FK>>
+    --
+    event_name : string
+    payload : json
+    attempt : integer
+    status : string
+    error : text
+    next_retry_at : timestamp
+    idempotency_key : string
+    --
+    * created_at : timestamp
+}
+
+entity JobQueue {
+    * job_id : integer <<generated>> <<PK>>
+    --
+    * type : string
+    payload : json
+    run_at : timestamp
+    attempts : integer
+    status : string
+    last_error : text
+    --
+    * created_at : timestamp
+    * updated_at : timestamp
+}
+
+entity CompanySettings {
+    * company_id : UUID <<PK>> <<FK>>
+    --
+    razao_social : string
+    cnpj : string
+    endereco : text
+    telefone : string
+    logo_ref : string
+    * default_currency : string
+    theme_settings : json
+    security_settings : json
+    integration_settings : json
+    --
+    * updated_at : timestamp
+}
+
+entity TenantSetting {
+    * setting_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    --
+    * setting_key : string
+    setting_value : text
+    data_type : string
+    --
+    * updated_at : timestamp
+}
+
+entity EmailTemplate {
+    * template_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    --
+    * name : string
+    subject : string
+    body : text
+    variables : json
+    * is_active : boolean
+    --
+    * created_at : timestamp
+}
+
+entity ReportSchedule {
+    * schedule_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    --
+    * report_type : string
+    frequency : string
+    parameters : json
+    last_run_at : timestamp
+    next_run_at : timestamp
+    * is_active : boolean
+    --
+    * created_at : timestamp
+}
+
+entity KPI {
+    * kpi_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    --
+    * name : string
+    calculation_query : text
+    target_value : decimal
+    period : string
+    --
+    * updated_at : timestamp
+}
+
+entity CompanyDomain {
+    * domain_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    --
+    * domain_name : string <<unique>>
+    is_primary : boolean
+    verified_at : timestamp
+    --
+    * created_at : timestamp
+}
+
+' Junction Tables for 1NF Compliance
+
+entity CompanyPhone {
+    * phone_id : UUID <<generated>> <<PK>>
+    * company_id : UUID <<FK>>
+    --
+    * phone_number : string
+    --
+    * created_at : timestamp
+}
+
+entity ContactTag {
+    * tag_id : UUID <<generated>> <<PK>>
+    * contact_id : UUID <<FK>>
+    --
+    * tag_name : string
+    --
+    * created_at : timestamp
+}
+
+entity PlanFeature {
+    * feature_id : UUID <<generated>> <<PK>>
+    * plan_id : UUID <<FK>>
+    --
+    * feature_name : string
+    feature_value : text
+    --
+    * created_at : timestamp
+}
+
+entity PlanLimit {
+    * limit_id : UUID <<generated>> <<PK>>
+    * plan_id : UUID <<FK>>
+    --
+    * limit_name : string
+    * limit_value : string
+    --
+    * created_at : timestamp
+}
+
+entity BackupCode {
+    * code_id : UUID <<generated>> <<PK>>
+    * two_factor_id : UUID <<FK>>
+    --
+    * code : string <<unique>>
+    used_at : timestamp
+    --
+    * created_at : timestamp
+}
+
+entity WebhookEventType {
+    * event_id : UUID <<generated>> <<PK>>
+    * endpoint_id : UUID <<FK>>
+    --
+    * event_type : string
+    --
+    * created_at : timestamp
+}
+
+' Relationships
+Company ||--|{ User
+Company ||--|| CompanySettings
+Company ||--|{ TenantSetting
+Company ||--|{ CompanyDomain
+User ||--|{ Session
+User ||--|{ OAuthAccount
+User |o--|| TwoFactor
+User ||--|{ PasswordResetToken
+User ||--|{ EmailVerificationToken
+User }o--o{ UserRole
+Company ||--|{ Contact
+Contact ||--o{ Deal
+User ||--o{ Deal
+Contact ||--o{ Activity
+Deal ||--o{ Activity
+User ||--o{ Activity
+Contact ||--|{ Invoice
+Company ||--|{ Product
+Company ||--|{ Service
+Sale ||--|{ SaleItem
+Contact ||--|{ Sale
+Product |o--o{ SaleItem
+Service |o--o{ SaleItem
+Product ||--|{ InventoryMovement
+Contact ||--o{ Contract
+Contract ||--|{ ContractInstallment
+ContractInstallment |o--o{ Payment
+BankAccount ||--o{ Payment
+Plan ||--o{ Subscription
+Company ||--|{ Subscription
+Invoice |o--o{ Revenue
+RevenueCategory ||--o{ Revenue
+CostCenter ||--o{ Revenue
+ExpenseCategory ||--o{ Expense
+CostCenter ||--o{ Expense
+Company ||--|{ BankAccount
+BankAccount ||--|{ BankStatementEntry
+Company ||--o{ Integration
+Company ||--|{ WebhookEndpoint
+WebhookEndpoint ||--|{ WebhookDelivery
+Company ||--o{ JobQueue
+Company ||--|{ Notification
+User ||--|{ Notification
+Company ||--|{ ReportSchedule
+Company ||--|{ KPI
+Company ||--|{ CompanyPhone
+Contact ||--|{ ContactTag
+Plan ||--|{ PlanFeature
+Plan ||--|{ PlanLimit
+TwoFactor ||--|{ BackupCode
+WebhookEndpoint ||--|{ WebhookEventType
+
+' Polymorphic relationships will be commented out as they cannot be directly drawn this way.
+' Document is related to many entities.
+' CalendarEvent is related to many entities.
+' Task is related to many entities.
+' Activity is related to many entities.
+@enduml
