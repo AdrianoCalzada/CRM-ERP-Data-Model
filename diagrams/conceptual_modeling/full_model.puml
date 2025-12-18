@@ -806,7 +806,7 @@ CompanyHasCompanySettings -(1,1)- CompanySettings
 relationship CompanyHasTenantSetting {
 }
 Company -(1,1)- CompanyHasTenantSetting
-CompanyHasTenantSetting -(1,M)- TenantSettings
+CompanyHasTenantSetting -(1,M)- TenantSetting
 
 relationship CompanyHasCompanyDomain {
 }
@@ -831,7 +831,7 @@ UserHasTwoFactor -(1,1)- TwoFactor
 relationship UserHasPasswordResetToken {
 }
 User -(1,1)- UserHasPasswordResetToken
-UserHasPasswordResetToken -(1,M)- PasswordVerificationToken
+UserHasPasswordResetToken -(1,M)- PasswordResetToken
 
 relationship UserHasEmailVerificationToken {
 }
